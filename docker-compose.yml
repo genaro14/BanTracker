@@ -10,7 +10,7 @@ services:
       - REMOTE_IP_URL=https://gpdev.com.ar/log/banned_ips.log
       - REMOTE_HISTORY_URL=https://gpdev.com.ar/log/ban_history.log
     volumes:
-      - bantracker-data:/app/data
+      - ./data:/app/data
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
