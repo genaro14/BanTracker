@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BanTracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #7c3aed;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    th {
+      background: #7c3aed;
+      color: white;
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.875rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #faf5ff;
+    }
+
+    .percentage-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .bar {
+      flex: 1;
+      height: 6px;
+      background: #e9e9e9;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #7c3aed;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .percentage-value {
+      min-width: 3.5rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .loading, .error {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #7c3aed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>BanTracker</h1>
+      <p class="subtitle">Banned IPs by Country</p>
+    </header>
+
+    <div class="stats">
+      <div>Total IPs: <span class="stat-value" id="total">-</span></div>
+      <div>Countries: <span class="stat-value" id="countries">-</span></div>
+    </div>
+
+    <div id="content">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/countries';
+
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const { data } = await response.json();
+        renderTable(data);
+      } catch (error) {
+        document.getElementById('content').innerHTML = 
+          `<div class="error">Failed to load data. Is the API running?</div>`;
+      }
+    }
+
+    function renderTable(data) {
+      const totalIps = data.reduce((sum, row) => sum + row.count, 0);
+      document.getElementById('total').textContent = totalIps.toLocaleString();
+      document.getElementById('countries').textContent = data.length;
+
+      const rows = data.map(row => `
+        <tr>
+          <td>${row.country || 'Unknown'}</td>
+          <td>
+            <div class="percentage-cell">
+              <div class="bar">
+                <div class="bar-fill" style="width: ${row.percentage}%"></div>
+              </div>
+              <span class="percentage-value">${row.percentage.toFixed(1)}%</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('content').innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>Percentage</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>
