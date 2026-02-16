@@ -1,8 +1,10 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import config from './config.js';
 import { initDatabase } from './db/schema.js';
 import { startPeriodicSync } from './services/fileSync.js';
 import { startGeoProcessor } from './services/geolocation.js';
+import { swaggerSpec } from './swagger.js';
 import apiRoutes from './routes/api.js';
 
 const app = express();
@@ -18,6 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Swagger docs
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes
 app.use('/api', apiRoutes);
 
@@ -26,6 +31,7 @@ app.get('/', (req, res) => {
   res.json({
     name: 'BanTracker API',
     version: '1.0.0',
+    docs: '/docs',
     endpoints: {
       stats: 'GET /api/stats',
       ips: 'GET /api/ips',

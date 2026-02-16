@@ -53,6 +53,8 @@ npm start
 
 ## API Endpoints
 
+Interactive API documentation available at `/docs` (Swagger UI).
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/stats` | GET | Summary statistics with country breakdown |
@@ -62,6 +64,7 @@ npm start
 | `/api/history` | GET | Historical ban counts |
 | `/api/sync` | POST | Trigger manual sync |
 | `/api/health` | GET | Health check |
+| `/docs` | GET | Swagger API documentation |
 
 ### Query Parameters
 
