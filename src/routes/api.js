@@ -324,6 +324,31 @@ router.post('/sync', async (req, res) => {
 
 /**
  * @swagger
+ * /api/ips/recent:
+ *   get:
+ *     summary: Get the 5 most recently banned IPs
+ *     tags: [IPs]
+ *     responses:
+ *       200:
+ *         description: List of 5 most recently banned IPs
+ */
+router.get('/ips/recent', (req, res) => {
+  try {
+    const recentIps = ipRepository.getRecent(5);
+
+    res.json({
+      data: recentIps
+    });
+  } catch (error) {
+    console.error('Recent IPs error:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     BannedIP:

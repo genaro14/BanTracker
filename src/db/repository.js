@@ -10,7 +10,7 @@ export const ipRepository = {
   // Get all IPs
   getAll(options = {}) {
     const db = getDb();
-    const { page = 1, limit = 50, country, active } = options;
+    const { page = 1, limit = 50, country, active, orderBy, order } = options;
     const offset = (page - 1) * limit;
 
     let query = 'SELECT * FROM banned_ips WHERE 1=1';
@@ -33,7 +33,13 @@ export const ipRepository = {
 
     const total = db.prepare(countQuery).get(...params).total;
 
-    query += ' ORDER BY last_seen DESC LIMIT ? OFFSET ?';
+    // Set default order
+    let orderClause = 'last_seen DESC';
+    if (orderBy && ['last_seen', 'first_seen', 'ip'].includes(orderBy)) {
+      orderClause = `${orderBy} ${order || 'DESC'}`;
+    }
+
+    query += ` ORDER BY ${orderClause} LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
     const data = db.prepare(query).all(...params);
@@ -373,6 +379,18 @@ export const ipRepository = {
       pendingGeo: total.count - withCountry.count,
       lastUpdated: lastUpdated.last
     };
+  },
+
+  // Get recent banned IPs
+  getRecent(limit = 5) {
+    const db = getDb();
+
+    return db.prepare(`
+      SELECT *
+      FROM banned_ips
+      ORDER BY last_seen DESC
+      LIMIT ?
+    `).all(limit);
   }
 };
 
